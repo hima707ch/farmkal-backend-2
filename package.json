@@ -4,8 +4,10 @@
   "description": "Farmkal backend",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
+    "start": "node server.js",
+    "prestart": "npm install",
+    "pretest": "npm install",
+    "test": "cross-env PORT=8001 ./node_modules/.bin/mocha --reporter mocha-multi-reporters --reporter-options configFile=config.json --exit"
   },
   "repository": {
     "type": "git",

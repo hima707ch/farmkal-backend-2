@@ -1,6 +1,6 @@
 const express = require("express");
 const bodyParse = require("body-parser");
-const cookieParser = require('cookie-parser');
+const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const User = require("./Models/user");
 const fileUpload = require("express-fileupload");
@@ -27,9 +27,13 @@ const clientsecret = "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";
 // setting cors
 app.use(
   cors({
-    origin : 'http://localhost:3000',
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-    credentials : true
+    origin: [
+      "https://www.farmkal.in",
+      "https://farmkal.web.app",
+      "http://localhost:3000",
+    ],
+    methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+    credentials: true,
   }),
 );
 
@@ -57,7 +61,7 @@ passport.use(
     {
       clientID: clientid,
       clientSecret: clientsecret,
-      callbackURL: "http://localhost:4000/auth/google/callback",
+      callbackURL: `${process.env.MY_DOMAIN}/auth/google/callback`,
       scope: ["profile", "email"],
     },
     async (accessToken, refreshToken, profile, done) => {
@@ -99,48 +103,46 @@ app.get(
 app.get(
   "/auth/google/callback",
   passport.authenticate("google", {
-    successRedirect: "http://localhost:3000/login",
-    failureRedirect: "http://localhost:3000/fail",
+    successRedirect: `${process.env.FRONT_DOMAIN}/login`,
+    failureRedirect: `${process.env.FRONT_DOMAIN}/fail`,
   }),
 );
 
 app.get("/login/sucess", async (req, res, next) => {
+  console.log("login success", req.user);
   if (req.isAuthenticated()) {
-    let user = await User. findOne({ email: req.user.email });
+    console.log("here");
+    let user = await User.findOne({ email: req.user.email });
 
-    if(!user){
-      return next( new CustomError() );
+    if (!user) {
+      return next(new CustomError());
     }
 
     sendToken(user, 200, res);
   } else {
-    res.status(400).json({ message: "Not Authorized", user : {} });
+    res.status(400).json({ message: "Not Authorized", user: {} });
   }
 });
 
 app.get("/logout", (req, res, next) => {
-  console.log('log')
+  console.log("log");
   req.logout(function (err) {
     if (err) {
       return next(err);
     }
-    
   });
 
-  res.cookie("token", null,{
-    expires: new Date(
-      Date.now() + 5 * 24 * 60 * 60 * 1000,
-    ),
+  res.cookie("token", null, {
+    expires: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000),
     httpOnly: true,
     sameSite: "none",
     secure: true,
   });
 
   res.status(200).json({
-    success : true,
-    message : "Logged out"
-})
-
+    success: true,
+    message: "Logged out",
+  });
 });
 
 // routes

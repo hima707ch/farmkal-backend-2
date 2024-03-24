@@ -108,6 +108,29 @@ app.get(
   }),
 );
 
+app.post("/getAccessToken", async (req, res) => {
+  console.log("get Access Token init");
+  const { email, name, photoUrl } = req.body;
+
+  if (!email) {
+    return res.status(400).json({ message: "Email is required" });
+  }
+
+  let user = await User.findOne({ email });
+
+  if (!user) {
+    user = await User.create({
+      email: email,
+      name: name,
+      photoUrl: photoUrl,
+    });
+  }
+
+  console.log(user);
+
+  sendToken(user, 200, res);
+});
+
 app.get("/login/sucess", async (req, res, next) => {
   console.log("login success", req.user);
   if (req.isAuthenticated()) {

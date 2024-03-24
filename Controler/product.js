@@ -9,8 +9,7 @@ const log = console.log;
 
 const createProduct = async (req, res, next) => {
   try {
-
-    log('req.body', req.body);
+    log("req.body", req.body);
 
     const {
       name,
@@ -21,7 +20,7 @@ const createProduct = async (req, res, next) => {
       longitude,
       state,
       city,
-      special
+      special,
     } = req.body;
 
     const productData = {
@@ -33,7 +32,7 @@ const createProduct = async (req, res, next) => {
       longitude,
       state,
       city,
-      special : JSON.parse( special ),
+      special: JSON.parse(special),
 
       seller: req.user.id,
     };
@@ -43,27 +42,24 @@ const createProduct = async (req, res, next) => {
     let images;
     let imageArray;
 
-    if (req.files != null && req.files.images != null ) {
+    if (req.files != null && req.files.images != null) {
       images = req.files.images;
       imageArray = Array.isArray(images) ? images : [images];
-    }
-
-    if (product) {
-      if (imageArray) {
-
-
-        for(const img of images){
-          await uploadImageToCloudinary(img, product, "Farmkal/Products", true);
-          console.log('uploaded 1 img'); 
-        }
-
-      }
     }
 
     res.status(200).json({
       success: true,
       product,
     });
+
+    if (product) {
+      if (imageArray) {
+        for (const img of images) {
+          await uploadImageToCloudinary(img, product, "Farmkal/Products", true);
+          console.log("uploaded 1 img");
+        }
+      }
+    }
   } catch (err) {
     return next(err);
   }
@@ -142,7 +138,6 @@ const getAllProduct = async (req, res, next) => {
 
 const getProduct = async (req, res, next) => {
   try {
-    
     const product = await Product.findById(req.params.id);
 
     if (!product) {
@@ -159,20 +154,19 @@ const getProduct = async (req, res, next) => {
 };
 
 // PRoduct of a particular user
-const getUserProduct = async(req,res,next)=> {
-  try{
-    let product = await Product.find({seller : req.user.id});
+const getUserProduct = async (req, res, next) => {
+  try {
+    let product = await Product.find({ seller: req.user.id });
 
-    console.log('m prod', product);
+    console.log("m prod", product);
     res.status(200).json({
       success: true,
       product,
     });
-  }
-  catch(err){
+  } catch (err) {
     next(err);
   }
-}
+};
 
 const updateProduct = async (req, res, next) => {
   try {
@@ -228,17 +222,21 @@ const updateProduct = async (req, res, next) => {
       return next(new CustomError("No product found", 400));
     }
 
-    if(req.files && req.files.images){
+    if (req.files && req.files.images) {
       console.log(req.files, req.files.images);
-      uploadImageToCloudinary(req.files.images, product, "Farmkal/Products", true);
+      uploadImageToCloudinary(
+        req.files.images,
+        product,
+        "Farmkal/Products",
+        true,
+      );
     }
-
 
     if (delete_public_id) {
       let is_deleted;
       console.log(is_deleted, delete_public_id);
 
-      console.log('prod . images', product.images)
+      console.log("prod . images", product.images);
 
       product.images = product.images.filter((image) => {
         if (image.public_id == delete_public_id) {
@@ -248,7 +246,7 @@ const updateProduct = async (req, res, next) => {
         return true;
       });
 
-      console.log('prod . images', product.images)
+      console.log("prod . images", product.images);
 
       await product.save();
 
@@ -297,5 +295,5 @@ module.exports = {
   getProduct,
   updateProduct,
   deleteProduct,
-  getUserProduct
+  getUserProduct,
 };

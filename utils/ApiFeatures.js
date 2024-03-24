@@ -25,16 +25,23 @@ class ApiFeatures {
     let categoryValue;
 
     if (query.category) {
-      categoryValue = query.category.split(",").map( cat => cat.toLocaleLowerCase() ) || [];
+      categoryValue =
+        query.category
+          .split(",")
+          .map((cat) => cat.toLocaleLowerCase())
+          .filter((cat) => (cat.length > 0 ? true : false)) || [];
 
-      query.category = { $in: categoryValue };
+      query.category = {
+        $in: categoryValue.map((val) => new RegExp(val, "i")),
+      };
     }
 
     if (query.city && typeof query.city == "string") {
-      let cities = query.city.split(',').map( c => c.toLocaleLowerCase() ) || [] ;
-      
-      query.city = { $in : cities };
-      
+      let cities =
+        query.city.split(",").map((c) => c.toLocaleLowerCase()) || [];
+
+      query.city = { $in: cities };
+
       console.log(query.city);
     }
 

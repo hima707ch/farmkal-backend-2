@@ -9,7 +9,7 @@ const { default: mongoose } = require("mongoose");
 
 const create = async (req, res, next) => {
   try {
-    console.log(req.files);
+    console.log("req.body", req.body);
 
     const {
       name,
@@ -148,65 +148,65 @@ const login = async (req, res, next) => {
   }
 };
 
-const myDetails = async( req, res,next )=>{
-  const user = await User.findById( req.user.id );
+const myDetails = async (req, res, next) => {
+  const user = await User.findById(req.user.id);
 
-  if(!user){
-    return next( new CustomError('Invalid user' , 200) );
+  if (!user) {
+    return next(new CustomError("Invalid user", 200));
   }
 
   res.status(200).json({
-    success : true,
-    user
-  })
+    success: true,
+    user,
+  });
+};
 
-}
-
-const updateCart = async( req,res, next ) =>{
-  try{
+const updateCart = async (req, res, next) => {
+  try {
     const user = await User.findById(req.user.id);
 
-    console.log('update cart, body', req.body)
+    console.log("update cart, body", req.body);
 
-    if(req.body.type === 'add'){
+    if (req.body.type === "add") {
       user.cart.push({
-        productId : req.body.productId,
-        quantity : req.body.quantity || 1
-      })
+        productId: req.body.productId,
+        quantity: req.body.quantity || 1,
+      });
     }
-    if(req.body.type === 'quantity'){
-      for(const element of user.cart){
-        if(element.productId === req.body.productId){
+    if (req.body.type === "quantity") {
+      for (const element of user.cart) {
+        if (element.productId === req.body.productId) {
           element.quantity = req.body.quantity;
           break;
         }
-      };
+      }
     }
-    if(req.body.type === 'remove'){
-      console.log('in remove cart')
-      user.cart = user.cart.filter( (ele)=>{
-        let prod_id = new mongoose.Types.ObjectId( req.body.productId );
+    if (req.body.type === "remove") {
+      console.log("in remove cart");
+      user.cart = user.cart.filter((ele) => {
+        let prod_id = new mongoose.Types.ObjectId(req.body.productId);
 
-        if(ele.productId.equals(prod_id)) {console.log('in false'); return false;}
+        if (ele.productId.equals(prod_id)) {
+          console.log("in false");
+          return false;
+        }
         return true;
-      } )
+      });
     }
 
-    console.log('user cart',user);
+    console.log("user cart", user);
     await user.save();
 
     req.user = user;
 
     res.status(201).json({
-      success : true,
-      user
-    })
-
-  }
-  catch(err){
+      success: true,
+      user,
+    });
+  } catch (err) {
     next(err);
   }
-}
+};
 
 const getChatUserList = async (req, res, next) => {
   console.log("get chat list called");
@@ -234,7 +234,7 @@ const getChatUserList = async (req, res, next) => {
       if (!Array.isArray(myAllChat[uniqueId])) continue;
 
       const user = await User.findById(uniqueId)
-        .select("name email phone username")
+        .select("name email phone username photoUrl")
         .exec();
 
       if (!user) {
@@ -249,6 +249,7 @@ const getChatUserList = async (req, res, next) => {
         ObjId: uniqueId,
         name: user.name,
         phone: user.phone,
+        photoUrl: user.photoUrl,
       });
     }
 
@@ -343,5 +344,5 @@ module.exports = {
   getChatData,
   getAllUser,
   getUser,
-  myDetails
+  myDetails,
 };
